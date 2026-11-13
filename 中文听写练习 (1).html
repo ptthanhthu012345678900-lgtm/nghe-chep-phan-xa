@@ -1,0 +1,809 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nghe chép Chính Tả Tiếng Trung · Free Chinese Dictation</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23bc3b2c'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='white' font-family='sans-serif'%3E听%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#f1ece1; --card:#fff; --ink:#20242e; --muted:#6b6659;
+    --line:#e7dfcf; --soft:#ece4d3; --dark:#232833; --accent:#bc3b2c;
+    --accent-soft:#f8e7e3; --ok:#3f7d52; --ok-soft:#e8f2ea;
+    --bad:#b5462f; --bad-soft:#f9e9e5; --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:16px; line-height:1.6; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1320px;margin:0 auto;padding:0 24px 72px}
+  button{font-family:inherit}
+
+  /* ===== 顶部 ===== */
+  header.top{display:flex;align-items:center;gap:16px;padding:20px 0;flex-wrap:wrap}
+  .logo{width:52px;height:52px;border-radius:14px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;flex:none}
+  .titles h1{font-size:22px;font-weight:700;letter-spacing:.2px}
+  .titles p{font-size:13px;color:var(--muted)}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .lang-seg{display:flex;background:var(--soft);border-radius:12px;padding:3px;gap:2px}
+  .lang-seg button{border:0;background:transparent;padding:7px 13px;border-radius:9px;font-size:14px;color:var(--muted);cursor:pointer}
+  .lang-seg button.active{background:var(--dark);color:#fff;font-weight:600}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:12px;padding:10px 16px;font-size:15px;cursor:pointer;min-height:42px}
+  .btn-dark{background:var(--dark);color:#fff}
+  .btn-ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+  .btn-soft{background:var(--soft);color:var(--ink)}
+  .btn-accent{background:var(--accent);color:#fff;font-weight:600}
+  .menu-wrap{position:relative}
+  .menu-panel{position:absolute;right:0;top:50px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px rgba(60,50,30,.14);min-width:190px;overflow:hidden;z-index:30}
+  .menu-panel button{display:block;width:100%;text-align:left;border:0;background:#fff;padding:12px 16px;font-size:15px;cursor:pointer;color:var(--ink)}
+  .menu-panel button:hover{background:var(--soft)}
+  .hidden{display:none !important}
+
+  /* ===== 首页 ===== */
+  .hero{padding:26px 0 18px}
+  .hero h2{font-size:34px;font-weight:700;letter-spacing:.3px}
+  .hero p{color:var(--muted);font-size:16px;margin-top:4px}
+
+  .filters{display:flex;flex-direction:column;gap:14px;padding:14px 0 22px}
+  .filter-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .filter-label{font-size:12px;letter-spacing:1.2px;color:var(--muted);font-weight:600;min-width:74px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 15px;font-size:14px;color:var(--ink);cursor:pointer}
+  .chip.active{background:var(--dark);border-color:var(--dark);color:#fff;font-weight:600}
+  .filter-right{margin-left:auto}
+  select.sort{border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 12px;font-size:14px;color:var(--ink);font-family:inherit}
+
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+  .deck{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+  .deck:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(60,50,30,.12)}
+  .cover{position:relative;aspect-ratio:16/10;background:linear-gradient(135deg,var(--c1,#d9c9a8),var(--c2,#b9c4a8));overflow:hidden}
+  .cover-char{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px;color:rgba(255,255,255,.22);font-weight:700;user-select:none}
+  .cover-badge-video{position:absolute;top:12px;right:12px;background:rgba(35,40,51,.82);color:#fff;font-size:12px;padding:4px 10px;border-radius:8px}
+  .cover-level{position:absolute;left:12px;bottom:12px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:8px}
+  .deck .body{padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .deck .title{font-size:17px;font-weight:600;line-height:1.4}
+  .deck .title .sub{color:var(--muted);font-weight:400}
+  .deck .desc{font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+  .deck .foot{display:flex;align-items:center;gap:10px;margin-top:4px}
+  .deck .tag{background:var(--soft);color:var(--ink);font-size:12.5px;padding:5px 10px;border-radius:8px}
+  .deck .count{font-size:13px;color:var(--muted)}
+  .deck .arrow{margin-left:auto;color:var(--accent);font-size:18px}
+  .deck-custom{border:1.5px dashed var(--line);background:transparent;align-items:center;justify-content:center;text-align:center;min-height:280px;color:var(--muted);cursor:pointer}
+  .deck-custom .plus{width:54px;height:54px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--ink);margin-bottom:10px}
+  .empty-grid{grid-column:1/-1;text-align:center;color:var(--muted);padding:60px 0}
+
+  /* ===== 练习页 ===== */
+  .practice-card{max-width:640px;margin:24px auto 0;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+  .exit-link{background:none;border:0;color:var(--muted);font-size:13px;cursor:pointer;padding:4px 2px;margin-bottom:10px}
+  .exit-link:hover{color:var(--accent)}
+  .deck-title{font-size:19px;font-weight:600;margin-bottom:14px}
+  .prog{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:8px}
+  .bar{height:8px;background:var(--soft);border-radius:99px;overflow:hidden;margin-bottom:20px}
+  .bar > i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s}
+  .speaker-zone{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0 6px}
+  .speak-btn{width:92px;height:92px;border-radius:50%;border:0;background:var(--accent-soft);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .speak-btn:active{transform:scale(.95)}
+  .speak-btn svg{width:40px;height:40px}
+  .speak-label{font-size:14px;color:var(--muted)}
+  .hints{text-align:center;min-height:34px;margin:6px 0}
+  .hints .py{font-size:19px;letter-spacing:1px}
+  .hints .vi{font-size:14px;color:var(--muted);margin-top:2px}
+  .answer-box{margin-top:16px}
+  .answer-box input{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:14px;font-size:22px;text-align:center;letter-spacing:2px;outline:none;color:var(--ink)}
+  .answer-box input:focus{border-color:var(--accent)}
+  .answer-box input:disabled{background:var(--bg)}
+  .hint-btns{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  .hint-btns .btn{padding:8px 14px;font-size:14px;min-height:38px;border-radius:10px}
+  .feedback{margin-top:18px;border-radius:14px;padding:16px;display:none}
+  .feedback.ok{display:block;background:var(--ok-soft)}
+  .feedback.bad{display:block;background:var(--bad-soft)}
+  .feedback .verdict{font-weight:600;margin-bottom:6px}
+  .feedback.ok .verdict{color:var(--ok)}
+  .feedback.bad .verdict{color:var(--bad)}
+  .feedback .answer{font-size:22px;letter-spacing:2px}
+  .feedback .meta{font-size:14px;color:var(--muted);margin-top:4px}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .btn-row .btn{flex:1}
+
+  /* ===== 结果页 ===== */
+  .result-card{max-width:640px;margin:24px auto 0;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+  .result-card h2{font-size:22px;margin-bottom:16px}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+  .stat{background:var(--soft);border-radius:14px;padding:16px;text-align:center}
+  .stat .num{font-size:28px;font-weight:700}
+  .stat .lbl{font-size:13px;color:var(--muted)}
+  .list h3{font-size:15px;margin-bottom:10px}
+  .list ul{list-style:none}
+  .list li{display:flex;gap:12px;align-items:baseline;padding:10px 2px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .list li .hz{font-size:18px;min-width:120px}
+  .list li .py{color:var(--muted);font-size:13px}
+  .list li .vi{color:var(--muted);font-size:13px}
+  .empty{color:var(--muted);font-size:14px;padding:10px 0}
+
+  /* ===== 弹窗 ===== */
+  .overlay{position:fixed;inset:0;background:rgba(30,28,22,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:40}
+  .modal{background:#fff;border-radius:20px;max-width:520px;width:100%;padding:26px;max-height:85vh;overflow:auto}
+  .modal h3{font-size:19px;margin-bottom:12px}
+  .modal ol{padding-left:20px;display:flex;flex-direction:column;gap:10px;color:var(--ink)}
+  .modal textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:15px;font-family:inherit;line-height:1.7;outline:none}
+  .modal .hint-line{font-size:13px;color:var(--muted);margin-top:8px}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+  #toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+  #toast.show{opacity:.95}
+
+  @media (max-width:1080px){ .grid{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:820px){ .grid{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:520px){
+    .wrap{padding:0 16px 56px}
+    .hero h2{font-size:26px}
+    .grid{grid-template-columns:1fr}
+    .titles h1{font-size:18px}
+    .stat .num{font-size:22px}
+    .answer-box input{font-size:19px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- ===== 顶部 ===== -->
+  <header class="top">
+    <div class="logo">听</div>
+    <div class="titles">
+      <h1 id="appTitle">Nghe chép Chính Tả Tiếng Trung</h1>
+      <p id="appSub">听写练习 · Nghe &amp; Viết</p>
+    </div>
+    <div class="top-right">
+      <div class="lang-seg" id="langSeg">
+        <button data-lang="vi" class="active">VI</button>
+        <button data-lang="en">EN</button>
+        <button data-lang="zh">中</button>
+      </div>
+      <button class="btn btn-ghost" id="guideBtn">✦ <span id="guideLabel">Hướng dẫn</span></button>
+      <div class="menu-wrap">
+        <button class="btn btn-dark" id="menuBtn">☰ <span id="menuLabel">Menu</span> ▾</button>
+        <div class="menu-panel hidden" id="menuPanel">
+          <button id="menuHome">Trang chủ</button>
+          <button id="menuWrong">Câu đã sai</button>
+          <button id="menuReset">Xoá tiến trình đã lưu</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== 视图：首页 / 课程墙 ===== -->
+  <section id="view-home">
+    <div class="hero">
+      <h2 id="welcome">Chào mừng trở lại.</h2>
+      <p id="welcomeSub">Chọn một bài và bắt đầu lắng nghe.</p>
+    </div>
+
+    <div class="filters">
+      <div class="filter-row">
+        <span class="filter-label" id="levelLabel">CẤP ĐỘ</span>
+        <div class="chips" id="levelChips"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label" id="topicLabel">CHỦ ĐỀ</span>
+        <div class="chips" id="topicChips"></div>
+        <div class="filter-right">
+          <select class="sort" id="sortSel"></select>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label" id="scriptLabel">CHỮ VIẾT</span>
+        <div class="chips" id="scriptChips"></div>
+      </div>
+    </div>
+
+    <div class="grid" id="deckGrid"></div>
+  </section>
+
+  <!-- ===== 视图：练习 ===== -->
+  <section id="view-practice" class="hidden">
+    <div class="practice-card">
+      <button class="exit-link" id="exitBtn">← <span id="exitLabel">Thoát</span></button>
+      <div class="deck-title" id="practiceDeckTitle"></div>
+      <div class="prog">
+        <span id="progText">1 / 1</span>
+        <span id="progScore">0</span>
+      </div>
+      <div class="bar"><i id="progBar" style="width:0%"></i></div>
+
+      <div class="speaker-zone">
+        <button class="speak-btn" id="speakBtn" aria-label="朗读">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/>
+            <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+            <path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+          </svg>
+        </button>
+        <span class="speak-label" id="replayLabel">Nghe lại</span>
+      </div>
+
+      <div class="hints">
+        <div class="py" id="hintPy"></div>
+        <div class="vi" id="hintVi"></div>
+      </div>
+
+      <div class="answer-box">
+        <input type="text" id="answerInput" autocomplete="off" autocapitalize="off">
+        <div class="hint-btns">
+          <button class="btn btn-soft" id="btnPy"><span id="hintPyLabel">Hiện pinyin</span></button>
+          <button class="btn btn-soft" id="btnVi"><span id="hintViLabel">Hiện nghĩa</span></button>
+        </div>
+      </div>
+
+      <div class="feedback" id="feedback">
+        <div class="verdict" id="verdict"></div>
+        <div class="answer" id="answerText"></div>
+        <div class="meta" id="answerMeta"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-accent" id="checkBtn"><span id="checkLabel">Kiểm tra</span></button>
+        <button class="btn btn-dark hidden" id="nextBtn"><span id="nextLabel">Câu tiếp</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：结果 ===== -->
+  <section id="view-result" class="hidden">
+    <div class="result-card">
+      <h2 id="resultTitle">Kết quả bài học</h2>
+      <div class="stat-grid">
+        <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl" id="totalLabel">Tổng số</div></div>
+        <div class="stat"><div class="num" id="statCorrect">0</div><div class="lbl" id="correctLabel">Đúng</div></div>
+        <div class="stat"><div class="num" id="statAcc">0%</div><div class="lbl" id="accLabel">Tỷ lệ đúng</div></div>
+      </div>
+      <div class="list">
+        <h3 id="wrongBookTitle">Câu cần ôn tập</h3>
+        <ul id="wrongList"></ul>
+        <div class="empty hidden" id="wrongEmpty">Làm đúng hết, tuyệt vời!</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="reviewBtn"><span id="reviewLabel">Ôn lại câu sai</span></button>
+        <button class="btn btn-soft" id="againBtn"><span id="againLabel">Làm lại</span></button>
+        <button class="btn btn-ghost" id="homeBtn"><span id="homeLabel">Về trang chủ</span></button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- 引导弹窗 -->
+<div class="overlay hidden" id="guideOverlay">
+  <div class="modal">
+    <h3 id="guideTitle">Cách luyện tập</h3>
+    <ol id="guideSteps"></ol>
+    <div class="modal-actions">
+      <button class="btn btn-dark" id="guideClose">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- 自定义课程弹窗 -->
+<div class="overlay hidden" id="customOverlay">
+  <div class="modal">
+    <h3 id="customTitle">Tạo bài ghi chép riêng</h3>
+    <textarea id="customText" placeholder="Mỗi dòng một câu: Hán tự | Pinyin | Nghĩa tiếng Việt"></textarea>
+    <p class="hint-line" id="customHint">Định dạng: 汉字 | pinyin | nghĩa. Pinyin và nghĩa có thể để trống.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="customCancel">Huỷ</button>
+      <button class="btn btn-accent" id="customStart"><span id="startLabel">Bắt đầu</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ==================== 多语言文案 ==================== */
+const I18N = {
+  vi: {
+    appTitle:'Nghe chép Chính Tả Tiếng Trung', appSub:'听写练习 · Nghe & Viết',
+    welcome:'Chào mừng trở lại.', welcomeSub:'Chọn một bài và bắt đầu lắng nghe.',
+    levelLabel:'CẤP ĐỘ', topicLabel:'CHỦ ĐỀ', scriptLabel:'CHỮ VIẾT',
+    levelAll:'All', topicAll:'All', simp:'Giản thể', trad:'Phồn thể',
+    newest:'Mới nhất', levelSort:'Cấp độ', countSort:'Số câu',
+    guideLabel:'Hướng dẫn', menuLabel:'Menu', menuHome:'Trang chủ', menuWrong:'Câu đã sai', menuReset:'Xoá tiến trình đã lưu',
+    replayLabel:'Nghe lại', hintPyLabel:'Hiện pinyin', hintViLabel:'Hiện nghĩa',
+    checkLabel:'Kiểm tra', nextLabel:'Câu tiếp', exitLabel:'Thoát',
+    verdictOk:'Chính xác!', verdictBad:'Chưa đúng',
+    resultTitle:'Kết quả bài học', totalLabel:'Tổng số', correctLabel:'Đúng', accLabel:'Tỷ lệ đúng',
+    wrongBookTitle:'Câu cần ôn tập', reviewLabel:'Ôn lại câu sai', againLabel:'Làm lại', homeLabel:'Về trang chủ',
+    emptyWrong:'Làm đúng hết, tuyệt vời!', noWrong:'Chưa có câu sai nào trong sổ.',
+    customTitle:'Tạo bài ghi chép riêng', customHint:'Định dạng: 汉字 | pinyin | nghĩa. Pinyin và nghĩa có thể để trống.',
+    customCardTitle:'Tạo bài của riêng bạn', customCardDesc:'Dán danh sách câu hoặc từ của bạn để bắt đầu luyện tập.',
+    startLabel:'Bắt đầu', guideTitle:'Cách luyện tập', countUnit:'câu', videoBadge:'Video',
+    videoBadge:'Bài học',
+    guideSteps:['Chọn một bài học bên dưới','Nghe câu bằng nút loa','Viết câu bạn nghe được vào ô','Kiểm tra và xem gợi ý pinyin, nghĩa','Ôn lại các câu chưa đúng ở cuối bài']
+  },
+  en: {
+    appTitle:'Chinese Character Dictation', appSub:'听写练习 · Listen & Write',
+    welcome:'Welcome back.', welcomeSub:'Pick a lesson and start listening.',
+    levelLabel:'LEVEL', topicLabel:'TOPIC', scriptLabel:'SCRIPT',
+    levelAll:'All', topicAll:'All', simp:'Simplified', trad:'Traditional',
+    newest:'Newest', levelSort:'Level', countSort:'Sentences',
+    guideLabel:'Guide', menuLabel:'Menu', menuHome:'Home', menuWrong:'Missed sentences', menuReset:'Clear saved progress',
+    replayLabel:'Replay', hintPyLabel:'Show pinyin', hintViLabel:'Show meaning',
+    checkLabel:'Check', nextLabel:'Next', exitLabel:'Exit',
+    verdictOk:'Correct!', verdictBad:'Not quite',
+    resultTitle:'Lesson result', totalLabel:'Total', correctLabel:'Correct', accLabel:'Accuracy',
+    wrongBookTitle:'To review', reviewLabel:'Review missed', againLabel:'Retry', homeLabel:'Home',
+    emptyWrong:'All correct, great job!', noWrong:'No missed sentences yet.',
+    customTitle:'Create your own lesson', customHint:'Format: hanzi | pinyin | meaning. Pinyin and meaning are optional.',
+    customCardTitle:'Create your own lesson', customCardDesc:'Paste your own list of sentences or words to practice.',
+    startLabel:'Start', guideTitle:'How to practice', countUnit:'sentences', videoBadge:'Video',
+    videoBadge:'Lesson',
+    guideSteps:['Choose a lesson below','Listen with the speaker button','Write what you hear in the box','Check and view pinyin / meaning hints','Review missed sentences at the end']
+  },
+  zh: {
+    appTitle:'中文听写练习', appSub:'听写练习 · Nghe & Viết',
+    welcome:'欢迎回来。', welcomeSub:'选择一篇课文，开始听写。',
+    levelLabel:'等级', topicLabel:'主题', scriptLabel:'字体',
+    levelAll:'全部', topicAll:'全部', simp:'简体', trad:'繁体',
+    newest:'最新', levelSort:'等级', countSort:'句数',
+    guideLabel:'帮助', menuLabel:'菜单', menuHome:'首页', menuWrong:'错题本', menuReset:'清除本地进度',
+    replayLabel:'再听一遍', hintPyLabel:'显示拼音', hintViLabel:'显示释义',
+    checkLabel:'确认答案', nextLabel:'下一句', exitLabel:'退出',
+    verdictOk:'回答正确！', verdictBad:'回答错误',
+    resultTitle:'本次练习结果', totalLabel:'总题数', correctLabel:'答对', accLabel:'正确率',
+    wrongBookTitle:'需要复习的内容', reviewLabel:'复习错句', againLabel:'再来一组', homeLabel:'返回首页',
+    emptyWrong:'全部答对，太棒了！', noWrong:'错题本还是空的。',
+    customTitle:'创建自定义课程', customHint:'格式：汉字 | 拼音 | 释义。拼音和释义可以留空。',
+    customCardTitle:'创建你自己的课程', customCardDesc:'粘贴你自己的句子或词语表，开始练习。',
+    startLabel:'开始', guideTitle:'练习步骤', countUnit:'句', videoBadge:'视频',
+    videoBadge:'课文',
+    guideSteps:['在下方选择一篇课文','点击喇叭按钮朗读','在输入框写出听到的内容','确认答案，查看拼音和释义提示','最后复习答错的句子']
+  }
+};
+
+const LEVEL_LABEL = {
+  'hsk1-2':{vi:'HSK1-2',en:'HSK1-2',zh:'HSK1-2'},
+  'hsk2':{vi:'HSK2',en:'HSK2',zh:'HSK2'},
+  'hsk3':{vi:'HSK3',en:'HSK3',zh:'HSK3'},
+  'hsk4':{vi:'HSK4',en:'HSK4',zh:'HSK4'},
+  'hsk5':{vi:'HSK5',en:'HSK5',zh:'HSK5'},
+  'hsk6':{vi:'HSK6',en:'HSK6',zh:'HSK6'}
+};
+const LEVEL_RANK = {'hsk1-2':1,'hsk2':2,'hsk3':3,'hsk4':4,'hsk5':5,'hsk6':6};
+const TOPIC_LABEL = {
+  story:{vi:'Tác phẩm/Truyện',en:'Literature',zh:'作品故事'},
+  life:{vi:'Đời sống',en:'Life',zh:'生活'},
+  food:{vi:'Ăn uống',en:'Food',zh:'饮食'},
+  edu:{vi:'Giáo dục',en:'Education',zh:'教育'},
+  culture:{vi:'Văn hoá',en:'Culture',zh:'文化'},
+  business:{vi:'Kinh doanh',en:'Business',zh:'商务'}
+};
+
+/* ==================== 内置课程 ==================== */
+const DECKS = [
+  {
+    id:'d1', title:'你好，自我介绍', sub:'HSK1-2', level:'hsk1-2', topic:'life', script:'simp',
+    desc:'你好，你叫什么名字？我是中国人，很高兴认识你。',
+    c1:'#c9a88a', c2:'#8fa68a', char:'你',
+    sentences:[
+      {hz:'你好，你叫什么名字？',py:'Nǐ hǎo, nǐ jiào shénme míngzi?',vi:'Xin chào, bạn tên là gì?'},
+      {hz:'我是中国人。',py:'Wǒ shì Zhōngguó rén.',vi:'Tôi là người Trung Quốc.'},
+      {hz:'我是学生。',py:'Wǒ shì xuéshēng.',vi:'Tôi là học sinh.'},
+      {hz:'这是我的朋友。',py:'Zhè shì wǒ de péngyou.',vi:'Đây là bạn của tôi.'},
+      {hz:'很高兴认识你。',py:'Hěn gāoxìng rènshi nǐ.',vi:'Rất vui được gặp bạn.'},
+      {hz:'谢谢你，再见！',py:'Xièxie nǐ, zàijiàn!',vi:'Cảm ơn bạn, tạm biệt!'}
+    ]
+  },
+  {
+    id:'d2', title:'学校生活', sub:'HSK2', level:'hsk2', topic:'edu', script:'simp',
+    desc:'我每天早上七点去学校，老师教我们写汉字，同学之间互相帮助。',
+    c1:'#8aa6c9', c2:'#a89bc4', char:'校',
+    sentences:[
+      {hz:'我每天早上七点去学校。',py:'Wǒ měitiān zǎoshang qī diǎn qù xuéxiào.',vi:'Tôi mỗi ngày lúc bảy giờ sáng đến trường.'},
+      {hz:'老师教我们写汉字。',py:'Lǎoshī jiāo wǒmen xiě Hànzì.',vi:'Thầy cô dạy chúng tôi viết chữ Hán.'},
+      {hz:'同学之间互相帮助。',py:'Tóngxué zhījiān hùxiāng bāngzhù.',vi:'Bạn bè trong lớp giúp đỡ lẫn nhau.'},
+      {hz:'我们在学校学习汉语。',py:'Wǒmen zài xuéxiào xuéxí Hànyǔ.',vi:'Chúng tôi học tiếng Trung ở trường.'},
+      {hz:'放学后我喜欢看书。',py:'Fàngxué hòu wǒ xǐhuan kàn shū.',vi:'Sau giờ học tôi thích đọc sách.'}
+    ]
+  },
+  {
+    id:'d3', title:'去买水果', sub:'Buying fruits', level:'hsk3', topic:'food', script:'simp',
+    desc:'今天小花帮妈妈去买水果。我们来看看她买了什么水果的！',
+    c1:'#d9a85f', c2:'#c97a5f', char:'果',
+    sentences:[
+      {hz:'今天小花帮妈妈去买水果。',py:'Jīntiān Xiǎo Huā bāng māma qù mǎi shuǐguǒ.',vi:'Hôm nay Tiểu Hoa giúp mẹ đi mua trái cây.'},
+      {hz:'水果店里有很多水果。',py:'Shuǐguǒ diàn lǐ yǒu hěn duō shuǐguǒ.',vi:'Trong cửa hàng trái cây có rất nhiều loại quả.'},
+      {hz:'她买了苹果、橘子和香蕉。',py:'Tā mǎi le píngguǒ, júzi hé xiāngjiāo.',vi:'Cô ấy mua táo, cam và chuối.'},
+      {hz:'苹果又大又红。',py:'Píngguǒ yòu dà yòu hóng.',vi:'Quả táo vừa to vừa đỏ.'},
+      {hz:'妈妈说这些水果很新鲜。',py:'Māma shuō zhèxiē shuǐguǒ hěn xīnxiān.',vi:'Mẹ nói những quả này rất tươi.'},
+      {hz:'我们一起来吃水果吧。',py:'Wǒmen yìqǐ lái chī shuǐguǒ ba.',vi:'Chúng ta cùng ăn trái cây nhé.'}
+    ]
+  },
+  {
+    id:'d4', title:'饮食文化', sub:'Văn hoá ẩm thực', level:'hsk3', topic:'culture', script:'simp',
+    desc:'中国人吃饭常用筷子，茶是中国很有名的饮料，不同地方有不同的菜。',
+    c1:'#7fa68a', c2:'#c9b26a', char:'茶',
+    sentences:[
+      {hz:'中国人吃饭常用筷子。',py:'Zhōngguó rén chī fàn cháng yòng kuàizi.',vi:'Người Trung Quốc ăn cơm thường dùng đũa.'},
+      {hz:'茶是中国很有名的饮料。',py:'Chá shì Zhōngguó hěn yǒngmíng de yǐnliào.',vi:'Trà là thức uống nổi tiếng của Trung Quốc.'},
+      {hz:'不同地方有不同的菜。',py:'Bùtóng dìfāng yǒu bùtóng de cài.',vi:'Mỗi vùng có những món ăn khác nhau.'},
+      {hz:'吃饭的时候，人们喜欢聊天。',py:'Chī fàn de shíhou, rénmen xǐhuan liáotiān.',vi:'Khi ăn, mọi người thích trò chuyện.'},
+      {hz:'欢迎你来中国品尝美食。',py:'Huānyíng nǐ lái Zhōngguó pǐncháng měishí.',vi:'Chào mừng bạn đến Trung Quốc thưởng thức ẩm thực.'}
+    ]
+  },
+  {
+    id:'d5', title:'我喜欢看电影', sub:'HSK4', level:'hsk4', topic:'life', script:'simp',
+    desc:'你喜欢看电影吗？我很喜欢看电影。好电影就像好朋友一样，让我们笑，也让我们思考。',
+    c1:'#6f86b5', c2:'#8a7aa8', char:'影',
+    sentences:[
+      {hz:'你喜欢看电影吗？',py:'Nǐ xǐhuan kàn diànyǐng ma?',vi:'Bạn thích xem phim không?'},
+      {hz:'我很喜欢看电影。',py:'Wǒ hěn xǐhuan kàn diànyǐng.',vi:'Tôi rất thích xem phim.'},
+      {hz:'好电影就像好朋友一样。',py:'Hǎo diànyǐng jiù xiàng hǎo péngyou yíyàng.',vi:'Phim hay giống như một người bạn tốt.'},
+      {hz:'它让我们笑，也让我们思考。',py:'Tā ràng wǒmen xiào, yě ràng wǒmen sīkǎo.',vi:'Nó khiến chúng ta cười, cũng khiến chúng ta suy nghĩ.'},
+      {hz:'周末我常和朋友一起去看电影。',py:'Zhōumò wǒ cháng hé péngyou yìqǐ qù kàn diànyǐng.',vi:'Cuối tuần tôi thường đi xem phim cùng bạn.'},
+      {hz:'你最喜欢哪一部电影？',py:'Nǐ zuì xǐhuan nǎ yī bù diànyǐng?',vi:'Bạn thích bộ phim nào nhất?'}
+    ]
+  },
+  {
+    id:'d6', title:'孙悟空拜师学法术', sub:'HSK5', level:'hsk5', topic:'story', script:'simp',
+    desc:'孙悟空本来是一只石猴。他想学习长生不老的法术。他决定离开家，去找大神仙拜师学…',
+    c1:'#5f7d6a', c2:'#4a6a8a', char:'悟',
+    sentences:[
+      {hz:'孙悟空本来是一只石猴。',py:'Sūn Wùkōng běnlái shì yī zhī shí hóu.',vi:'Tôn Ngộ Không vốn là một con khỉ đá.'},
+      {hz:'他想学习长生不老的法术。',py:'Tā xiǎng xuéxí chángshēng bù lǎo de fǎshù.',vi:'Anh ta muốn học phép thuật bất tử.'},
+      {hz:'他决定离开家，去拜大神仙为师。',py:'Tā juédìng líkāi jiā, qù bài dà shénxiān wéi shī.',vi:'Anh ta quyết định rời nhà, đi bái vị thần lớn làm thầy.'},
+      {hz:'路上他遇到了很多困难。',py:'Lùshang tā yùdào le hěn duō kùnnán.',vi:'Trên đường anh ta gặp rất nhiều khó khăn.'},
+      {hz:'但是他没有放弃。',py:'Dànshì tā méiyǒu fàngqì.',vi:'Nhưng anh ta không từ bỏ.'},
+      {hz:'最后他终于学到了本领。',py:'Zuìhòu tā zhōngyú xué dào le běnlǐng.',vi:'Cuối cùng anh ta cũng học được bản lĩnh.'}
+    ]
+  },
+  {
+    id:'d7', title:'多语言者的优势', sub:'HSK6', level:'hsk6', topic:'edu', script:'simp',
+    desc:'掌握多种语言到底有什么好处？本期 HSK6 级故事带你了解多语言者的认知、经济和…',
+    c1:'#4a5a7a', c2:'#6a4a6a', char:'言',
+    sentences:[
+      {hz:'掌握多种语言到底有什么好处？',py:'Zhǎngwò duō zhǒng yǔyán dàodǐ yǒu shénme hǎochù?',vi:'Việc thông thạo nhiều ngôn ngữ cuối cùng có lợi ích gì?'},
+      {hz:'会说外语可以认识更多朋友。',py:'Huì shuō wàiyǔ kěyǐ rènshi gèng duō péngyou.',vi:'Biết ngoại ngữ có thể kết thêm nhiều bạn.'},
+      {hz:'学习语言也能了解不同的文化。',py:'Xuéxí yǔyán yě néng liǎojiě bùtóng de wénhuà.',vi:'Học ngôn ngữ cũng giúp hiểu các nền văn hóa khác nhau.'},
+      {hz:'多语言者在工作中有更多机会。',py:'Duō yǔyán zhě zài gōngzuò zhōng yǒu gèng duō jīhuì.',vi:'Người đa ngữ có nhiều cơ hội hơn trong công việc.'},
+      {hz:'学习新语言永远不会太晚。',py:'Xuéxí xīn yǔyán yǒngyuǎn bú huì tài wǎn.',vi:'Học ngôn ngữ mới không bao giờ là quá muộn.'}
+    ]
+  },
+  {
+    id:'d8', title:'日常生活与天气', sub:'HSK2', level:'hsk2', topic:'life', script:'simp',
+    desc:'今天天气很好，我每天学习汉语，我喜欢喝茶，我们明天见。',
+    c1:'#b58a6f', c2:'#7fa6b5', char:'天',
+    sentences:[
+      {hz:'今天天气很好。',py:'Jīntiān tiānqì hěn hǎo.',vi:'Hôm nay thời tiết rất đẹp.'},
+      {hz:'我每天学习汉语。',py:'Wǒ měitiān xuéxí Hànyǔ.',vi:'Tôi học tiếng Trung mỗi ngày.'},
+      {hz:'我喜欢喝茶。',py:'Wǒ xǐhuan hē chá.',vi:'Tôi thích uống trà.'},
+      {hz:'我们明天见。',py:'Wǒmen míngtiān jiàn.',vi:'Hẹn gặp lại ngày mai.'},
+      {hz:'请问，洗手间在哪里？',py:'Qǐngwèn, xǐshǒujiān zài nǎlǐ?',vi:'Xin hỏi, nhà vệ sinh ở đâu?'},
+      {hz:'这件衣服多少钱？',py:'Zhè jiàn yīfu duōshao qián?',vi:'Chiếc áo này bao nhiêu tiền?'}
+    ]
+  }
+];
+
+/* ==================== 状态与存储 ==================== */
+const $ = id => document.getElementById(id);
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+
+const state = {
+  lang: LS.get('dictation.lang','vi'),
+  filters:{level:'all', topic:'all', script:'all', sort:'newest'}
+};
+const S = {
+  deck:null, items:[], index:0, correct:0, wrong:[], answered:false,
+  rate:0.85, repeats:1
+};
+
+/* ==================== 工具 ==================== */
+function t(key){ return (I18N[state.lang] && I18N[state.lang][key]) || I18N.vi[key] || key; }
+function norm(s){ return String(s).replace(/[\s，。！？、,.!?!:：；;""''（）()【】《》]/g,''); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+let toastTimer=null;
+function toast(msg){ const el=$('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),1800); }
+
+/* ==================== 语音 ==================== */
+let zhVoice=null;
+function pickVoice(){
+  if(!('speechSynthesis' in window)) return;
+  const vs=speechSynthesis.getVoices();
+  zhVoice=vs.find(v=>/zh(-|_)?CN/i.test(v.lang))||vs.find(v=>/^zh/i.test(v.lang))||null;
+}
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+function speakText(text,times){
+  if(!('speechSynthesis' in window)){ toast('Trình duyệt không hỗ trợ đọc giọng nói'); return; }
+  speechSynthesis.cancel();
+  let left=Math.max(1,times||1);
+  const loop=()=>{
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='zh-CN'; if(zhVoice) u.voice=zhVoice; u.rate=S.rate;
+    u.onend=()=>{ left--; if(left>0) loop(); };
+    speechSynthesis.speak(u);
+  };
+  loop();
+}
+
+/* ==================== 视图切换 ==================== */
+function show(view){
+  ['home','practice','result'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==view));
+}
+
+/* ==================== 首页渲染 ==================== */
+function chipEl(label,value,active,onClick){
+  const b=document.createElement('button');
+  b.className='chip'+(active?' active':'');
+  b.textContent=label;
+  b.addEventListener('click',()=>{ onClick(value); });
+  return b;
+}
+function renderChips(){
+  const f=state.filters;
+  const lc=$('levelChips'); lc.innerHTML='';
+  lc.appendChild(chipEl(t('levelAll'),'all',f.level==='all',v=>{f.level=v;renderChips();renderCards();}));
+  Object.keys(LEVEL_LABEL).forEach(k=>{
+    if(DECKS.some(d=>d.level===k))
+      lc.appendChild(chipEl(LEVEL_LABEL[k][state.lang],k,f.level===k,v=>{f.level=v;renderChips();renderCards();}));
+  });
+
+  const tc=$('topicChips'); tc.innerHTML='';
+  tc.appendChild(chipEl(t('topicAll'),'all',f.topic==='all',v=>{f.topic=v;renderChips();renderCards();}));
+  Object.keys(TOPIC_LABEL).forEach(k=>{
+    if(DECKS.some(d=>d.topic===k))
+      tc.appendChild(chipEl(TOPIC_LABEL[k][state.lang],k,f.topic===k,v=>{f.topic=v;renderChips();renderCards();}));
+  });
+
+  const sc=$('scriptChips'); sc.innerHTML='';
+  sc.appendChild(chipEl(t('levelAll'),'all',f.script==='all',v=>{f.script=v;renderChips();renderCards();}));
+  sc.appendChild(chipEl(t('simp'),'simp',f.script==='simp',v=>{f.script=v;renderChips();renderCards();}));
+  sc.appendChild(chipEl(t('trad'),'trad',f.script==='trad',v=>{f.script=v;renderChips();renderCards();}));
+
+  const sort=$('sortSel');
+  sort.innerHTML='';
+  [['newest',t('newest')],['level',t('levelSort')],['count',t('countSort')]].forEach(([v,label])=>{
+    const o=document.createElement('option'); o.value=v; o.textContent=label; if(f.sort===v) o.selected=true;
+    sort.appendChild(o);
+  });
+}
+
+function visibleDecks(){
+  const f=state.filters;
+  let list=DECKS.filter(d=>
+    (f.level==='all'||d.level===f.level)&&
+    (f.topic==='all'||d.topic===f.topic)&&
+    (f.script==='all'||d.script===f.script)
+  );
+  if(f.sort==='level') list.sort((a,b)=>LEVEL_RANK[a.level]-LEVEL_RANK[b.level]);
+  else if(f.sort==='count') list.sort((a,b)=>b.sentences.length-a.sentences.length);
+  return list;
+}
+
+function cardEl(deck){
+  const a=document.createElement('article');
+  a.className='deck';
+  a.innerHTML=`
+    <div class="cover" style="--c1:${deck.c1};--c2:${deck.c2}">
+      <span class="cover-badge-video">${t('videoBadge')}</span>
+      <span class="cover-level">${LEVEL_LABEL[deck.level][state.lang]}</span>
+      <span class="cover-char">${deck.char}</span>
+    </div>
+    <div class="body">
+      <h3 class="title">${deck.title} <span class="sub">| ${deck.sub}</span></h3>
+      <p class="desc">${deck.desc}</p>
+      <div class="foot">
+        <span class="tag">${TOPIC_LABEL[deck.topic][state.lang]}</span>
+        <span class="count">${deck.sentences.length} ${t('countUnit')}</span>
+        <span class="arrow">→</span>
+      </div>
+    </div>`;
+  a.addEventListener('click',()=>startSession(deck));
+  return a;
+}
+
+function renderCards(){
+  const grid=$('deckGrid'); grid.innerHTML='';
+  const list=visibleDecks();
+  list.forEach(d=>grid.appendChild(cardEl(d)));
+
+  const custom=document.createElement('article');
+  custom.className='deck deck-custom';
+  custom.innerHTML=`
+    <div class="plus">+</div>
+    <div><strong>${t('customCardTitle')}</strong><p class="desc" style="margin-top:6px">${t('customCardDesc')}</p></div>`;
+  custom.addEventListener('click',()=>$('customOverlay').classList.remove('hidden'));
+  grid.appendChild(custom);
+
+  if(!list.length){
+    const e=document.createElement('div');
+    e.className='empty-grid'; e.textContent=t('noWrong');
+    grid.appendChild(e);
+  }
+}
+
+/* ==================== 会话流程 ==================== */
+function startSession(deck, itemsOverride){
+  S.deck=deck;
+  S.items=itemsOverride||deck.sentences;
+  S.index=0; S.correct=0; S.wrong=[]; S.answered=false;
+  show('practice');
+  renderCurrent();
+  speakCurrent();
+}
+function current(){ return S.items[S.index]; }
+
+function renderCurrent(){
+  const item=current();
+  S.answered=false;
+  $('practiceDeckTitle').textContent=S.deck.title;
+  $('progText').textContent=`${S.index+1} / ${S.items.length}`;
+  $('progScore').textContent=String(S.correct);
+  $('progBar').style.width=(S.index/S.items.length*100)+'%';
+  $('answerInput').value='';
+  $('answerInput').disabled=false;
+  $('feedback').className='feedback';
+  $('nextBtn').classList.add('hidden');
+  $('checkBtn').classList.remove('hidden');
+  $('hintPy').textContent=''; $('hintVi').textContent='';
+  $('answerInput').focus();
+}
+function speakCurrent(){ speakText(current().hz, S.repeats); }
+
+function checkAnswer(){
+  const item=current();
+  if(S.answered) return;
+  const val=$('answerInput').value.trim();
+  if(!val){ toast('Vui lòng nhập nội dung đã nghe'); return; }
+  const ok=norm(val)===norm(item.hz);
+  S.answered=true;
+  $('answerInput').disabled=true;
+  if(ok){ S.correct++; } else { S.wrong.push(item); saveWrong(); }
+
+  $('checkBtn').classList.add('hidden');
+  const fb=$('feedback');
+  fb.className='feedback '+(ok?'ok':'bad');
+  $('verdict').textContent=ok?t('verdictOk'):t('verdictBad');
+  $('answerText').textContent=item.hz;
+  $('answerMeta').textContent=[item.py,item.vi].filter(Boolean).join(' · ');
+  $('progScore').textContent=String(S.correct);
+  $('nextBtn').classList.remove('hidden');
+  $('nextBtn').focus();
+}
+
+function nextItem(){
+  if(S.index<S.items.length-1){ S.index++; renderCurrent(); speakCurrent(); }
+  else finishSession();
+}
+
+function finishSession(){
+  const total=S.items.length;
+  const acc=total?Math.round(S.correct/total*100):0;
+  $('statTotal').textContent=total;
+  $('statCorrect').textContent=S.correct;
+  $('statAcc').textContent=acc+'%';
+  const ul=$('wrongList'); ul.innerHTML='';
+  $('wrongEmpty').classList.toggle('hidden',S.wrong.length>0);
+  S.wrong.forEach(item=>{
+    const li=document.createElement('li');
+    const hz=document.createElement('span'); hz.className='hz'; hz.textContent=item.hz;
+    const py=document.createElement('span'); py.className='py'; py.textContent=item.py||'';
+    const vi=document.createElement('span'); vi.className='vi'; vi.textContent=item.vi||'';
+    li.append(hz,py,vi); ul.appendChild(li);
+  });
+  show('result');
+}
+
+/* ==================== 错句本 ==================== */
+function loadWrong(){ return LS.get('dictation.wrong',[]); }
+function saveWrong(){
+  const exist=loadWrong();
+  S.wrong.forEach(item=>{ if(!exist.some(x=>x.hz===item.hz)) exist.push(item); });
+  LS.set('dictation.wrong',exist);
+}
+function startReview(){
+  const wrong=loadWrong();
+  if(!wrong.length){ toast(t('noWrong')); return; }
+  startSession({title:t('wrongBookTitle'), sub:'', c1:'#888', c2:'#aaa', char:'复'}, wrong.slice());
+}
+
+/* ==================== 自定义课程 ==================== */
+function parseCustom(text){
+  return text.split(/\n+/).map(l=>l.trim()).filter(Boolean).map(line=>{
+    const p=line.split(/[|\t，,]/).map(s=>s.trim());
+    return {hz:p[0]||'', py:p[1]||'', vi:p[2]||''};
+  }).filter(x=>x.hz);
+}
+
+/* ==================== 语言切换 ==================== */
+function applyLang(){
+  const L=I18N[state.lang];
+  $('appTitle').textContent=L.appTitle;
+  $('appSub').textContent=L.appSub;
+  $('welcome').textContent=L.welcome;
+  $('welcomeSub').textContent=L.welcomeSub;
+  $('levelLabel').textContent=L.levelLabel;
+  $('topicLabel').textContent=L.topicLabel;
+  $('scriptLabel').textContent=L.scriptLabel;
+  $('guideLabel').textContent=L.guideLabel;
+  $('menuLabel').textContent=L.menuLabel;
+  $('menuHome').textContent=L.menuHome;
+  $('menuWrong').textContent=L.menuWrong;
+  $('menuReset').textContent=L.menuReset;
+  $('replayLabel').textContent=L.replayLabel;
+  $('hintPyLabel').textContent=L.hintPyLabel;
+  $('hintViLabel').textContent=L.hintViLabel;
+  $('checkLabel').textContent=L.checkLabel;
+  $('nextLabel').textContent=L.nextLabel;
+  $('exitLabel').textContent=L.exitLabel;
+  $('resultTitle').textContent=L.resultTitle;
+  $('totalLabel').textContent=L.totalLabel;
+  $('correctLabel').textContent=L.correctLabel;
+  $('accLabel').textContent=L.accLabel;
+  $('wrongBookTitle').textContent=L.wrongBookTitle;
+  $('reviewLabel').textContent=L.reviewLabel;
+  $('againLabel').textContent=L.againLabel;
+  $('homeLabel').textContent=L.homeLabel;
+  $('wrongEmpty').textContent=L.emptyWrong;
+  $('customTitle').textContent=L.customTitle;
+  $('customHint').textContent=L.customHint;
+  $('startLabel').textContent=L.startLabel;
+  $('guideTitle').textContent=L.guideTitle;
+  document.documentElement.lang=state.lang;
+  const steps=$('guideSteps'); steps.innerHTML='';
+  L.guideSteps.forEach(s=>{ const li=document.createElement('li'); li.textContent=s; steps.appendChild(li); });
+  document.querySelectorAll('#langSeg button').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));
+  LS.set('dictation.lang',state.lang);
+  renderChips(); renderCards();
+}
+
+/* ==================== 事件 ==================== */
+function bind(){
+  document.querySelectorAll('#langSeg button').forEach(b=>{
+    b.addEventListener('click',()=>{ state.lang=b.dataset.lang; applyLang(); });
+  });
+
+  $('sortSel').addEventListener('change',e=>{ state.filters.sort=e.target.value; renderCards(); });
+
+  $('guideBtn').addEventListener('click',()=>$('guideOverlay').classList.remove('hidden'));
+  $('guideClose').addEventListener('click',()=>$('guideOverlay').classList.add('hidden'));
+  $('guideOverlay').addEventListener('click',e=>{ if(e.target===$('guideOverlay')) $('guideOverlay').classList.add('hidden'); });
+
+  $('menuBtn').addEventListener('click',e=>{ e.stopPropagation(); $('menuPanel').classList.toggle('hidden'); });
+  document.addEventListener('click',()=>$('menuPanel').classList.add('hidden'));
+  $('menuHome').addEventListener('click',()=>show('home'));
+  $('menuWrong').addEventListener('click',()=>{ $('menuPanel').classList.add('hidden'); startReview(); });
+  $('menuReset').addEventListener('click',()=>{ LS.set('dictation.wrong',[]); toast('Đã xoá tiến trình đã lưu'); });
+
+  $('speakBtn').addEventListener('click',speakCurrent);
+  $('answerInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ S.answered?nextItem():checkAnswer(); } });
+  $('btnPy').addEventListener('click',()=>{ $('hintPy').textContent=current().py||'—'; });
+  $('btnVi').addEventListener('click',()=>{ $('hintVi').textContent=current().vi||'—'; });
+  $('checkBtn').addEventListener('click',checkAnswer);
+  $('nextBtn').addEventListener('click',nextItem);
+  $('exitBtn').addEventListener('click',()=>{ if('speechSynthesis' in window) speechSynthesis.cancel(); show('home'); });
+
+  $('reviewBtn').addEventListener('click',startReview);
+  $('againBtn').addEventListener('click',()=>startSession(S.deck));
+  $('homeBtn').addEventListener('click',()=>show('home'));
+
+  $('customCancel').addEventListener('click',()=>$('customOverlay').classList.add('hidden'));
+  $('customOverlay').addEventListener('click',e=>{ if(e.target===$('customOverlay')) $('customOverlay').classList.add('hidden'); });
+  $('customStart').addEventListener('click',()=>{
+    const items=parseCustom($('customText').value);
+    if(!items.length){ toast('Chưa có nội dung nào'); return; }
+    $('customOverlay').classList.add('hidden');
+    startSession({title:t('customTitle'), sub:'', c1:'#9a8fb5', c2:'#7fa6a0', char:'我'}, items);
+  });
+}
+
+/* ==================== 初始化 ==================== */
+bind();
+applyLang();
+show('home');
+</script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->
